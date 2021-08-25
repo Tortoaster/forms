@@ -1,7 +1,8 @@
-use crate::component::Component;
 use std::ops::Deref;
 
-mod component;
+use crate::component::Component;
+
+pub mod component;
 mod rocket;
 
 pub struct Task<C> {

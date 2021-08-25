@@ -1,13 +1,13 @@
 [package]
-name = "itasks"
+name = "itasks_derive"
 version = "0.1.0"
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[features]
-default = ["rocket"]
+[lib]
+proc-macro = true
 
 [dependencies]
-rocket = { version = "0.5.0-rc.1", optional = true }
-itasks_derive = { path = "./itasks_derive" }
+syn = "1.0"
+quote = "1.0"
