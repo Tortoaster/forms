@@ -43,7 +43,7 @@ pub fn component_derive(input: TokenStream) -> TokenStream {
                 impl Component for #name {
                     fn view(&self) -> String {
                         #content
-                        format!("<div><h5>{}</h5>{}</div>", stringify!(#name), content.join("<br/>"))
+                        format!("<div class=\"component\"><div class=\"title\">{}</div><div class=\"content\">{}</div></div>", stringify!(#name), content.join("<hr/>"))
                     }
                 }
             };
@@ -63,7 +63,7 @@ pub fn component_derive(input: TokenStream) -> TokenStream {
                 };
 
                 matches.extend(quote_spanned! {variant.span()=>
-                    #name::#variant_name #variant_fields => format!("<div><h5>{}</h5><h6>{}</h6></div>", stringify!(#name), stringify!(#variant_name)),
+                    #name::#variant_name #variant_fields => format!("<div class=\"component\"><div class=\"title\">{}</div><div class=\"subtitle\">{}</div><div class=\"content\"></div></div>", stringify!(#name), stringify!(#variant_name)),
                 });
             }
 

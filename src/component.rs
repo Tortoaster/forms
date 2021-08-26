@@ -107,7 +107,7 @@ impl Component for () {
 impl<C1> Component for (C1, )
     where C1: Component {
     fn view(&self) -> String {
-        format!("<div>{}</div>", self.0.view())
+        format!("<div class=\"component\">{}</div>", self.0.view())
     }
 }
 
@@ -115,7 +115,7 @@ impl<C1, C2> Component for (C1, C2)
     where C1: Component,
           C2: Component {
     fn view(&self) -> String {
-        format!("<div>{}<br/>{}</div>", self.0.view(), self.1.view())
+        format!("<div class=\"component\">{}<hr/>{}</div>", self.0.view(), self.1.view())
     }
 }
 
@@ -124,7 +124,7 @@ impl<C1, C2, C3> Component for (C1, C2, C3)
           C2: Component,
           C3: Component {
     fn view(&self) -> String {
-        format!("<div>{}<br/>{}<br/>{}</div>", self.0.view(), self.1.view(), self.2.view())
+        format!("<div class=\"component\">{}<hr/>{}<hr/>{}</div>", self.0.view(), self.1.view(), self.2.view())
     }
 }
 
@@ -134,6 +134,6 @@ impl<C1, C2, C3, C4> Component for (C1, C2, C3, C4)
           C3: Component,
           C4: Component {
     fn view(&self) -> String {
-        format!("<div>{}<br/>{}<br/>{}<br/>{}</div>", self.0.view(), self.1.view(), self.2.view(), self.3.view())
+        format!("<div class=\"component\">{}<hr/>{}<hr/>{}<hr/>{}</div>", self.0.view(), self.1.view(), self.2.view(), self.3.view())
     }
 }

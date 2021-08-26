@@ -1,0 +1,45 @@
+html, body {
+    background-color: beige;
+    font-family: "Century Gothic", sans-serif;
+    margin: 0;
+    padding: 0.5em;
+}
+
+hr {
+    border:none;
+    height: 0.5em;
+    margin: 0 0 0.5em 0;
+    box-shadow: 0 0.1em 0.1em -0.1em dimgray;
+}
+
+.component {
+    border-radius: 0.5em;
+    box-shadow: 0 0 0.1em dimgray;
+    display: inline-block;
+    margin: 0.5em;
+    min-width: 20em;
+    overflow: hidden;
+}
+
+.title {
+    background-color: burlywood;
+    color: white;
+    font-weight: bold;
+    padding: 0.5em;
+}
+
+.subtitle {
+    background-color: bisque;
+    color: burlywood;
+    font-style: italic;
+    padding: 0.5em;
+}
+
+.content {
+    background-color: white;
+    padding: 0.5em;
+}
+
+.content:empty {
+    padding: 0;
+}
