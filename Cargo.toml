@@ -8,6 +8,12 @@ edition = "2018"
 [features]
 default = ["rocket"]
 
+[workspace]
+members = [
+    ".",
+    "itasks_derive",
+]
+
 [dependencies]
-rocket = { version = "0.5.0-rc.1", optional = true }
 itasks_derive = { path = "./itasks_derive" }
+rocket = { version = "0.5.0-rc.1", optional = true }

@@ -1,5 +1,7 @@
 use std::ops::Deref;
 
+pub use itasks_derive;
+
 use crate::component::Component;
 
 pub mod component;

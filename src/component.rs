@@ -104,7 +104,7 @@ impl Component for () {
     }
 }
 
-impl<C1> Component for (C1,)
+impl<C1> Component for (C1, )
     where C1: Component {
     fn view(&self) -> String {
         format!("<div>{}</div>", self.0.view())
@@ -137,28 +137,3 @@ impl<C1, C2, C3, C4> Component for (C1, C2, C3, C4)
         format!("<div>{}<br/>{}<br/>{}<br/>{}</div>", self.0.view(), self.1.view(), self.2.view(), self.3.view())
     }
 }
-
-// enum Test {
-//     Empty,
-//     Anon(bool),
-//     With {
-//         x: u8,
-//         y: u16,
-//     },
-// }
-//
-// impl Component for Test {
-//     fn view(&self) -> String {
-//         match self {
-//             Test::Empty => {
-//                 format!("<div><h5>Test</h5><h6>Empty</h6><div>")
-//             }
-//             Test::Anon(a) => {
-//                 format!("<div><h5>Test</h5><h6>Anon</h6>{}</div>", a.view())
-//             }
-//             Test::With { x, y } => {
-//                 format!("<div><h5>Test</h5><h6>With</h6>{}<br/>{}</div>", x.view(), y.view())
-//             }
-//         }
-//     }
-// }
