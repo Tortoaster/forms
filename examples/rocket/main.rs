@@ -4,9 +4,9 @@ extern crate rocket;
 
 use rocket::error::Error;
 
-use itasks::{Task, view};
 use itasks::component::Component;
 use itasks_derive::Component;
+use itasks::task::{Task, view};
 
 #[derive(Component)]
 struct Field(String);
