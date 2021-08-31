@@ -5,24 +5,30 @@ extern crate rocket;
 use rocket::error::Error;
 
 use itasks::component::Component;
+use itasks::prelude::*;
+use itasks::task::Task;
 use itasks_derive::Component;
-use itasks::task::{Task, view};
 
-#[derive(Component)]
+#[derive(Clone, Component)]
+struct Unit;
+
+#[derive(Clone, Component)]
 struct Field(String);
 
-#[derive(Component)]
+#[derive(Clone, Component)]
 struct Struct {
     field: Field,
+    unit: Unit,
 }
 
 #[get("/")]
 async fn index() -> Task<Struct> {
     let component = Struct {
-        field: Field("Hello".to_owned())
+        field: Field("Hello".to_owned()),
+        unit: Unit,
     };
 
-    view(component)
+    view(component.clone()).or(update(component)).or(enter())
 }
 
 #[rocket::main]

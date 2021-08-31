@@ -6,7 +6,7 @@ use rocket::{Request, Response};
 use rocket::http::ContentType;
 use rocket::response::Responder;
 
-use crate::Component;
+use crate::component::Component;
 use crate::task::Task;
 
 impl<'r, 'o: 'r, T: Component> Responder<'r, 'o> for Task<T> {
