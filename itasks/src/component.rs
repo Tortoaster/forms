@@ -1,3 +1,5 @@
+pub use itasks_derive::Component;
+
 pub trait Component {
     fn view(&self) -> String;
 

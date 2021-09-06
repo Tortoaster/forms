@@ -1,20 +1,6 @@
-[package]
-name = "itasks"
-version = "0.1.0"
-edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [workspace]
 members = [
-    ".",
+    "itasks",
     "itasks_derive",
+    "examples/itasks_rocket"
 ]
-
-[dependencies]
-itasks_derive = { path = "./itasks_derive" }
-rocket = { version = "0.5.0-rc.1", optional = true }
-
-[[example]]
-name = "rocket"
-required-features = ["rocket"]

@@ -1,13 +1,9 @@
-#![cfg(feature = "rocket")]
 #[macro_use]
 extern crate rocket;
 
 use rocket::error::Error;
 
-use itasks::component::Component;
 use itasks::prelude::*;
-use itasks::task::Task;
-use itasks_derive::Component;
 
 #[derive(Clone, Component)]
 struct Unit;
