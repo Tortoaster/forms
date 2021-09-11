@@ -55,7 +55,7 @@ pub fn component_derive(input: TokenStream) -> TokenStream {
                                 format!("<div class=\"component\"><div class=\"title\">{}</div><div class=\"content\">{}</div></div>", stringify!(#name), fields.join("<hr/>"))
                             }
 
-                            fn update(&mut self) -> String {
+                            fn update(&self) -> String {
                                 let fields = vec![
                                     #updates
                                 ];
@@ -102,7 +102,7 @@ pub fn component_derive(input: TokenStream) -> TokenStream {
                                 format!("<div class=\"component\"><div class=\"title\">{}</div><div class=\"content\">{}</div></div>", stringify!(#name), fields.join("<hr/>"))
                             }
 
-                            fn update(&mut self) -> String {
+                            fn update(&self) -> String {
                                 let fields = vec![
                                     #updates
                                 ];
@@ -124,7 +124,7 @@ pub fn component_derive(input: TokenStream) -> TokenStream {
                                 format!("<div class=\"component\"><div class=\"title\">{}</div></div>", stringify!(#name))
                             }
 
-                            fn update(&mut self) -> String {
+                            fn update(&self) -> String {
                                 format!("<div class=\"component\"><div class=\"title\">{}</div></div>", stringify!(#name))
                             }
                         }
@@ -163,7 +163,7 @@ pub fn component_derive(input: TokenStream) -> TokenStream {
 
                     }
 
-                    fn update(&mut self) -> String {
+                    fn update(&self) -> String {
 
                     }
                 }

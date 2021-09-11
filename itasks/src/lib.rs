@@ -1,4 +1,5 @@
 pub mod component;
+mod html;
 mod rocket;
 pub mod task;
 

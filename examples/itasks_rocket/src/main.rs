@@ -5,26 +5,20 @@ use rocket::error::Error;
 
 use itasks::prelude::*;
 
-#[derive(Clone, Component)]
-struct Unit;
-
-#[derive(Clone, Component)]
-struct Field(String);
-
-#[derive(Clone, Component)]
-struct Struct {
-    field: Field,
-    unit: Unit,
+#[derive(Component)]
+struct Person {
+    name: String,
+    age: u8,
 }
 
 #[get("/")]
-async fn index() -> Task<Struct> {
-    let component = Struct {
-        field: Field("Hello".to_owned()),
-        unit: Unit,
+async fn index() -> Task<(Person, Person)> {
+    let me = Person {
+        name: "Rick".to_owned(),
+        age: 22,
     };
 
-    view(component.clone()).or(update(component)).or(enter())
+    enter().and(view(me))
 }
 
 #[rocket::main]

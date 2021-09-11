@@ -1,35 +1,34 @@
-use crate::component::Component;
+use std::marker::PhantomData;
 
-pub enum Task<C> {
-    View(C),
-    Enter,
-    Update(C),
-    Either(Box<Task<C>>, Box<Task<C>>),
+use crate::component::Component;
+use crate::html::Html;
+
+pub struct Task<C> {
+    pub content: Html,
+    phantom: PhantomData<C>,
 }
 
 impl<C: Component> Task<C> {
-    pub fn content(self) -> String {
-        match self {
-            Task::View(component) => component.view(),
-            Task::Enter => C::enter(),
-            Task::Update(mut component) => component.update(),
-            Task::Either(left, right) => format!("<div class=\"component\"><div class=\"content\">{}{}</div></div>", left.content(), right.content())
+    fn new(content: Html) -> Task<C> {
+        Task {
+            content,
+            phantom: PhantomData::default()
         }
     }
 
-    pub fn or(self, other: Task<C>) -> Task<C> {
-        Task::Either(Box::new(self), Box::new(other))
+    pub fn and<D: Component>(self, other: Task<D>) -> Task<(C, D)> {
+        Task::new(format!("<div>{}{}</div>", self.content, other.content))
     }
 }
 
 pub fn view<C: Component>(component: C) -> Task<C> {
-    Task::View(component)
+    Task::new(component.view())
 }
 
 pub fn enter<C: Component>() -> Task<C> {
-    Task::Enter
+    Task::new(C::enter())
 }
 
 pub fn update<C: Component>(component: C) -> Task<C> {
-    Task::Update(component)
+    Task::new(component.update())
 }
