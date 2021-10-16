@@ -12,13 +12,44 @@ impl<C: Component> Task<C> {
     fn new(content: Html) -> Task<C> {
         Task {
             content,
-            phantom: PhantomData::default()
+            phantom: Default::default(),
         }
     }
 
     pub fn and<D: Component>(self, other: Task<D>) -> Task<(C, D)> {
         Task::new(format!("<div>{}{}</div>", self.content, other.content))
     }
+
+    pub fn actions<D>(self) -> Actions<C, D> {
+        Actions {
+            task: self,
+            phantom: Default::default(),
+        }
+    }
+}
+
+pub struct Actions<C, D> {
+    task: Task<C>,
+    phantom: PhantomData<D>,
+}
+
+impl<C, D> Actions<C, D> {
+    pub fn on(self, _action: Action, _f: impl FnOnce(C) -> Task<D>) -> Self {
+        self
+    }
+
+    pub fn finalize(self) -> Task<D> {
+        Task {
+            content: self.task.content,
+            phantom: Default::default(),
+        }
+    }
+}
+
+pub enum Action {
+    Ok,
+    Cancel,
+    Custom(String),
 }
 
 pub fn view<C: Component>(component: C) -> Task<C> {

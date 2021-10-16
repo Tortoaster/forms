@@ -4,6 +4,7 @@ extern crate rocket;
 use rocket::error::Error;
 
 use itasks::prelude::*;
+use itasks::task::Action;
 
 #[derive(Component)]
 struct Person {
@@ -12,19 +13,29 @@ struct Person {
 }
 
 #[get("/")]
-async fn index() -> Task<(Person, Person)> {
-    let me = Person {
-        name: "Rick".to_owned(),
-        age: 22,
-    };
+fn index() -> Task<Person> {
+    enter()
+        .actions()
+        .on(Action::Ok, |name| enter()
+            .actions()
+            .on(Action::Ok, |age| view(Person { name, age }))
+            .finalize()
+        )
+        .finalize()
+}
 
-    enter().and(view(me))
+#[get("/test")]
+fn test() -> Task<Person> {
+    view("Welcome!")
+        .actions()
+        .on(Action::Ok, |_| index())
+        .finalize()
 }
 
 #[rocket::main]
 async fn main() -> Result<(), Box<Error>> {
     rocket::build()
-        .mount("/", routes![index])
+        .mount("/", routes![index, test])
         .launch()
         .await?;
 
