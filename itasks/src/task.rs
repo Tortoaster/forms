@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 
 use crate::component::Component;
-use crate::html::Html;
+use crate::html::{Div, Html};
 
 pub struct Task<C> {
     pub content: Html,
@@ -17,7 +17,7 @@ impl<C: Component> Task<C> {
     }
 
     pub fn and<D: Component>(self, other: Task<D>) -> Task<(C, D)> {
-        Task::new(format!("<div>{}{}</div>", self.content, other.content))
+        Task::new(Html::Div(Div::new().with_child(self.content).with_child(other.content)))
     }
 
     pub fn actions<D>(self) -> Actions<C, D> {

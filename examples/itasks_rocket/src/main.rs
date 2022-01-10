@@ -14,14 +14,12 @@ struct Person {
 
 #[get("/")]
 fn index() -> Task<Person> {
-    enter()
-        .actions()
-        .on(Action::Ok, |name| enter()
-            .actions()
-            .on(Action::Ok, |age| view(Person { name, age }))
-            .finalize()
-        )
-        .finalize()
+    let person = Person {
+        name: "Rick".to_owned(),
+        age: 22,
+    };
+
+    view(person)
 }
 
 #[get("/test")]

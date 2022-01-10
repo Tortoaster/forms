@@ -1,6 +1,6 @@
 pub use itasks_derive::Component;
 
-use crate::html::Html;
+use crate::html::{Div, Html, Input, InputType};
 
 pub trait Component {
     fn view(&self) -> Html;
@@ -12,304 +12,241 @@ pub trait Component {
 
 impl Component for bool {
     fn view(&self) -> Html {
-        self.to_string()
+        Input::new("".to_owned())
+            .with_type(InputType::Checkbox)
+            .with_value(self.to_string())
+            .readonly()
+            .into()
     }
 
     fn enter() -> Html {
-        format!("<input type=\"checkbox\"/>")
+        Input::new("".to_owned())
+            .with_type(InputType::Checkbox)
+            .into()
     }
 
     fn update(&self) -> Html {
-        format!("<input type=\"checkbox\"{}/>", if *self { " checked" } else { "" })
+        Input::new("".to_owned())
+            .with_type(InputType::Checkbox)
+            .with_value(self.to_string())
+            .into()
     }
 }
 
-impl Component for isize {
-    fn view(&self) -> Html {
-        self.to_string()
-    }
+macro_rules! impl_num {
+    ($($t:ty),*) => {
+        $(
+            impl Component for $t {
+                fn view(&self) -> Html {
+                    Input::new("".to_owned())
+                        .with_type(InputType::Number)
+                        .with_value(self.to_string())
+                        .readonly()
+                        .into()
+                }
 
-    fn enter() -> Html {
-        format!("<input type=\"number\" min=\"{}\" max=\"{}\"/>", Self::MIN, Self::MAX)
-    }
+                fn enter() -> Html {
+                    Input::new("".to_owned())
+                        .with_type(InputType::Number)
+                        .into()
+                }
 
-    fn update(&self) -> Html {
-        format!("<input type=\"number\" min=\"{}\" max=\"{}\" value=\"{}\"/>", Self::MIN, Self::MAX, self)
-    }
+                fn update(&self) -> Html {
+                    Input::new("".to_owned())
+                        .with_type(InputType::Number)
+                        .with_value(self.to_string())
+                        .into()
+                }
+            }
+        )*
+    };
 }
 
-impl Component for usize {
-    fn view(&self) -> Html {
-        self.to_string()
-    }
-
-    fn enter() -> Html {
-        format!("<input type=\"number\" min=\"{}\" max=\"{}\"/>", Self::MIN, Self::MAX)
-    }
-
-    fn update(&self) -> Html {
-        format!("<input type=\"number\" min=\"{}\" max=\"{}\" value=\"{}\"/>", Self::MIN, Self::MAX, self)
-    }
-}
-
-impl Component for i8 {
-    fn view(&self) -> Html {
-        self.to_string()
-    }
-
-    fn enter() -> Html {
-        format!("<input type=\"number\" min=\"{}\" max=\"{}\"/>", Self::MIN, Self::MAX)
-    }
-
-    fn update(&self) -> Html {
-        format!("<input type=\"number\" min=\"{}\" max=\"{}\" value=\"{}\"/>", Self::MIN, Self::MAX, self)
-    }
-}
-
-impl Component for u8 {
-    fn view(&self) -> Html {
-        self.to_string()
-    }
-
-    fn enter() -> Html {
-        format!("<input type=\"number\" min=\"{}\" max=\"{}\"/>", Self::MIN, Self::MAX)
-    }
-
-    fn update(&self) -> Html {
-        format!("<input type=\"number\" min=\"{}\" max=\"{}\" value=\"{}\"/>", Self::MIN, Self::MAX, self)
-    }
-}
-
-impl Component for i16 {
-    fn view(&self) -> Html {
-        self.to_string()
-    }
-
-    fn enter() -> Html {
-        format!("<input type=\"number\" min=\"{}\" max=\"{}\"/>", Self::MIN, Self::MAX)
-    }
-
-    fn update(&self) -> Html {
-        format!("<input type=\"number\" min=\"{}\" max=\"{}\" value=\"{}\"/>", Self::MIN, Self::MAX, self)
-    }
-}
-
-impl Component for u16 {
-    fn view(&self) -> Html {
-        self.to_string()
-    }
-
-    fn enter() -> Html {
-        format!("<input type=\"number\" min=\"{}\" max=\"{}\"/>", Self::MIN, Self::MAX)
-    }
-
-    fn update(&self) -> Html {
-        format!("<input type=\"number\" min=\"{}\" max=\"{}\" value=\"{}\"/>", Self::MIN, Self::MAX, self)
-    }
-}
-
-impl Component for i32 {
-    fn view(&self) -> Html {
-        self.to_string()
-    }
-
-    fn enter() -> Html {
-        format!("<input type=\"number\" min=\"{}\" max=\"{}\"/>", Self::MIN, Self::MAX)
-    }
-
-    fn update(&self) -> Html {
-        format!("<input type=\"number\" min=\"{}\" max=\"{}\" value=\"{}\"/>", Self::MIN, Self::MAX, self)
-    }
-}
-
-impl Component for u32 {
-    fn view(&self) -> Html {
-        self.to_string()
-    }
-
-    fn enter() -> Html {
-        format!("<input type=\"number\" min=\"{}\" max=\"{}\"/>", Self::MIN, Self::MAX)
-    }
-
-    fn update(&self) -> Html {
-        format!("<input type=\"number\" min=\"{}\" max=\"{}\" value=\"{}\"/>", Self::MIN, Self::MAX, self)
-    }
-}
-
-impl Component for i64 {
-    fn view(&self) -> Html {
-        self.to_string()
-    }
-
-    fn enter() -> Html {
-        format!("<input type=\"number\" min=\"{}\" max=\"{}\"/>", Self::MIN, Self::MAX)
-    }
-
-    fn update(&self) -> Html {
-        format!("<input type=\"number\" min=\"{}\" max=\"{}\" value=\"{}\"/>", Self::MIN, Self::MAX, self)
-    }
-}
-
-impl Component for u64 {
-    fn view(&self) -> Html {
-        self.to_string()
-    }
-
-    fn enter() -> Html {
-        format!("<input type=\"number\" min=\"{}\" max=\"{}\"/>", Self::MIN, Self::MAX)
-    }
-
-    fn update(&self) -> Html {
-        format!("<input type=\"number\" min=\"{}\" max=\"{}\" value=\"{}\"/>", Self::MIN, Self::MAX, self)
-    }
-}
-
-impl Component for i128 {
-    fn view(&self) -> Html {
-        self.to_string()
-    }
-
-    fn enter() -> Html {
-        format!("<input type=\"number\" min=\"{}\" max=\"{}\"/>", Self::MIN, Self::MAX)
-    }
-
-    fn update(&self) -> Html {
-        format!("<input type=\"number\" min=\"{}\" max=\"{}\" value=\"{}\"/>", Self::MIN, Self::MAX, self)
-    }
-}
-
-impl Component for u128 {
-    fn view(&self) -> Html {
-        self.to_string()
-    }
-
-    fn enter() -> Html {
-        format!("<input type=\"number\" min=\"{}\" max=\"{}\"/>", Self::MIN, Self::MAX)
-    }
-
-    fn update(&self) -> Html {
-        format!("<input type=\"number\" min=\"{}\" max=\"{}\" value=\"{}\"/>", Self::MIN, Self::MAX, self)
-    }
-}
+impl_num!(isize, usize, i8, u8, i16, u16, i32, u32, i64, u64, i128, u128);
 
 impl Component for char {
     fn view(&self) -> Html {
-        self.to_string()
+        Input::new("".to_owned())
+            .with_type(InputType::Text)
+            .with_value(self.to_string())
+            .readonly()
+            .into()
     }
 
     fn enter() -> Html {
-        format!("<input type=\"text\" maxlength=\"1\"/>")
+        Input::new("".to_owned()).with_type(InputType::Text).into()
     }
 
     fn update(&self) -> Html {
-        format!("<input type=\"text\" maxlength=\"1\" value=\"{}\"/>", self)
+        Input::new("".to_owned())
+            .with_type(InputType::Text)
+            .with_value(self.to_string())
+            .into()
     }
 }
 
 impl Component for &str {
     fn view(&self) -> Html {
-        format!("<span>{}</span>", self)
+        Input::new("".to_owned())
+            .with_type(InputType::Text)
+            .with_value(self.to_string())
+            .readonly()
+            .into()
     }
 
     fn enter() -> Html {
-        format!("<input type=\"text\"/>")
+        Input::new("".to_owned()).with_type(InputType::Text).into()
     }
 
     fn update(&self) -> Html {
-        format!("<input type=\"text\" value=\"{}\"/>", self)
+        Input::new("".to_owned())
+            .with_type(InputType::Text)
+            .with_value(self.to_string())
+            .into()
     }
 }
 
 impl Component for String {
     fn view(&self) -> Html {
-        format!("<span>{}</span>", self)
+        Input::new("".to_owned())
+            .with_type(InputType::Text)
+            .with_value(self.clone())
+            .readonly()
+            .into()
     }
 
     fn enter() -> Html {
-        format!("<input type=\"text\"/>")
+        Input::new("".to_owned()).with_type(InputType::Text).into()
     }
 
     fn update(&self) -> Html {
-        format!("<input type=\"text\" value=\"{}\"/>", self)
+        Input::new("".to_owned())
+            .with_type(InputType::Text)
+            .with_value(self.clone())
+            .into()
     }
 }
 
 impl Component for () {
     fn view(&self) -> Html {
-        Html::new()
+        Div::new().into()
     }
 
     fn enter() -> Html {
-        Html::new()
+        Div::new().into()
     }
 
     fn update(&self) -> Html {
-        Html::new()
+        Div::new().into()
     }
 }
 
-impl<C1> Component for (C1, )
-    where C1: Component {
+impl<C1> Component for (C1,)
+where
+    C1: Component,
+{
     fn view(&self) -> Html {
-        format!("<div class=\"component\">{}</div>", self.0.view())
+        Div::new().with_child(self.0.view()).into()
     }
 
     fn enter() -> Html {
-        format!("<div class=\"component\">{}</div>", C1::enter())
+        Div::new().with_child(C1::enter()).into()
     }
 
     fn update(&self) -> Html {
-        format!("<div class=\"component\">{}</div>", self.0.update())
+        Div::new().with_child(self.0.update()).into()
     }
 }
 
 impl<C1, C2> Component for (C1, C2)
-    where C1: Component,
-          C2: Component {
+where
+    C1: Component,
+    C2: Component,
+{
     fn view(&self) -> Html {
-        format!("<div class=\"component\">{}<hr/>{}</div>", self.0.view(), self.1.view())
+        Div::new()
+            .with_child(self.0.view())
+            .with_child(self.1.view())
+            .into()
     }
 
     fn enter() -> Html {
-        format!("<div class=\"component\">{}<hr/>{}</div>", C1::enter(), C2::enter())
+        Div::new()
+            .with_child(C1::enter())
+            .with_child(C2::enter())
+            .into()
     }
 
     fn update(&self) -> Html {
-        format!("<div class=\"component\">{}<hr/>{}</div>", self.0.update(), self.1.update())
+        Div::new()
+            .with_child(self.0.update())
+            .with_child(self.1.update())
+            .into()
     }
 }
 
 impl<C1, C2, C3> Component for (C1, C2, C3)
-    where C1: Component,
-          C2: Component,
-          C3: Component {
+where
+    C1: Component,
+    C2: Component,
+    C3: Component,
+{
     fn view(&self) -> Html {
-        format!("<div class=\"component\">{}<hr/>{}<hr/>{}</div>", self.0.view(), self.1.view(), self.2.view())
+        Div::new()
+            .with_child(self.0.view())
+            .with_child(self.1.view())
+            .with_child(self.2.view())
+            .into()
     }
 
     fn enter() -> Html {
-        format!("<div class=\"component\">{}<hr/>{}<hr/>{}</div>", C1::enter(), C2::enter(), C3::enter())
+        Div::new()
+            .with_child(C1::enter())
+            .with_child(C2::enter())
+            .with_child(C3::enter())
+            .into()
     }
 
     fn update(&self) -> Html {
-        format!("<div class=\"component\">{}<hr/>{}<hr/>{}</div>", self.0.update(), self.1.update(), self.2.update())
+        Div::new()
+            .with_child(self.0.update())
+            .with_child(self.1.update())
+            .with_child(self.2.update())
+            .into()
     }
 }
 
 impl<C1, C2, C3, C4> Component for (C1, C2, C3, C4)
-    where C1: Component,
-          C2: Component,
-          C3: Component,
-          C4: Component {
+where
+    C1: Component,
+    C2: Component,
+    C3: Component,
+    C4: Component,
+{
     fn view(&self) -> Html {
-        format!("<div class=\"component\">{}<hr/>{}<hr/>{}<hr/>{}</div>", self.0.view(), self.1.view(), self.2.view(), self.3.view())
+        Div::new()
+            .with_child(self.0.view())
+            .with_child(self.1.view())
+            .with_child(self.2.view())
+            .with_child(self.3.view())
+            .into()
     }
 
     fn enter() -> Html {
-        format!("<div class=\"component\">{}<hr/>{}<hr/>{}<hr/>{}</div>", C1::enter(), C2::enter(), C3::enter(), C4::enter())
+        Div::new()
+            .with_child(C1::enter())
+            .with_child(C2::enter())
+            .with_child(C3::enter())
+            .with_child(C4::enter())
+            .into()
     }
 
     fn update(&self) -> Html {
-        format!("<div class=\"component\">{}<hr/>{}<hr/>{}<hr/>{}</div>", self.0.update(), self.1.update(), self.2.update(), self.3.update())
+        Div::new()
+            .with_child(self.0.update())
+            .with_child(self.1.update())
+            .with_child(self.2.update())
+            .with_child(self.3.update())
+            .into()
     }
 }
