@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 
 use crate::component::Component;
-use crate::html::{Div, Html};
+use crate::frontend::html::{Div, Html};
 
 pub struct Task<C> {
     pub content: Html,

@@ -1,6 +1,6 @@
 pub use itasks_derive::Component;
 
-use crate::html::{Div, Html, Input, InputType};
+use crate::frontend::html::{Div, Html, Input, InputType};
 
 pub trait Component {
     fn view(&self) -> Html;
