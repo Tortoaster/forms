@@ -10,16 +10,12 @@ use itasks::task::Action;
 struct Person {
     name: String,
     age: u8,
+    cool: bool,
 }
 
 #[get("/")]
 fn index() -> Task<Person> {
-    let person = Person {
-        name: "Rick".to_owned(),
-        age: 22,
-    };
-
-    view(person)
+    enter()
 }
 
 #[get("/test")]

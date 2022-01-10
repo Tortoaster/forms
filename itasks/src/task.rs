@@ -1,15 +1,15 @@
 use std::marker::PhantomData;
 
 use crate::component::Component;
-use crate::frontend::html::{Div, Html};
+use crate::frontend::Form;
 
 pub struct Task<C> {
-    pub content: Html,
+    pub content: Form,
     phantom: PhantomData<C>,
 }
 
 impl<C: Component> Task<C> {
-    fn new(content: Html) -> Task<C> {
+    fn new(content: Form) -> Task<C> {
         Task {
             content,
             phantom: Default::default(),
@@ -17,11 +17,7 @@ impl<C: Component> Task<C> {
     }
 
     pub fn and<D: Component>(self, other: Task<D>) -> Task<(C, D)> {
-        Task::new(Html::Div(
-            Div::new()
-                .with_child(self.content)
-                .with_child(other.content),
-        ))
+        Task::new(Form::Compound(vec![self.content, other.content]))
     }
 
     pub fn actions<D>(self) -> Actions<C, D> {

@@ -51,22 +51,22 @@ fn impl_component_named(
 
     quote! {
         impl #impl_generics Component for #ident #ty_generics #where_clause {
-            fn view(&self) -> Html {
-                Div::new()
-                    #(.with_child(self.#idents.view()))*
-                    .into()
+            fn view(&self) -> Form {
+                Form::Compound(vec![
+                    #(self.#idents.view().with_hint(stringify!(#idents).to_case(Case::Title)),)*
+                ]).into()
             }
 
-            fn enter() -> Html {
-                Div::new()
-                    #(.with_child(#types::enter()))*
-                    .into()
+            fn enter() -> Form {
+                Form::Compound(vec![
+                    #(#types::enter().with_hint(stringify!(#idents).to_case(Case::Title)),)*
+                ]).into()
             }
 
-            fn update(&self) -> Html {
-                Div::new()
-                    #(.with_child(self.#idents.update()))*
-                    .into()
+            fn update(&self) -> Form {
+                Form::Compound(vec![
+                    #(self.#idents.update().with_hint(stringify!(#idents).to_case(Case::Title)),)*
+                ]).into()
             }
         }
     }
@@ -159,8 +159,8 @@ fn impl_component_enum(ident: Ident, data_enum: DataEnum, generics: Generics) ->
         let variant_name = &variant.ident;
 
         let variant_fields = match &variant.fields {
-            Fields::Named(fields_named) => quote_spanned! {variant.fields.span()=> {..} },
-            Fields::Unnamed(fields_unnamed) => quote_spanned! {variant.fields.span()=> (..) },
+            Fields::Named(_) => quote_spanned! {variant.fields.span()=> {..} },
+            Fields::Unnamed(_) => quote_spanned! {variant.fields.span()=> (..) },
             Fields::Unit => quote_spanned! { variant.fields.span()=> },
         };
 

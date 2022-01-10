@@ -1,2 +1,4 @@
 mod form;
-pub mod html;
+mod html;
+
+pub use form::*;
