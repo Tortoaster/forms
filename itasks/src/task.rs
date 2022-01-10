@@ -17,7 +17,11 @@ impl<C: Component> Task<C> {
     }
 
     pub fn and<D: Component>(self, other: Task<D>) -> Task<(C, D)> {
-        Task::new(Html::Div(Div::new().with_child(self.content).with_child(other.content)))
+        Task::new(Html::Div(
+            Div::new()
+                .with_child(self.content)
+                .with_child(other.content),
+        ))
     }
 
     pub fn actions<D>(self) -> Actions<C, D> {

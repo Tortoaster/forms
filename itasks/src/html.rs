@@ -42,7 +42,9 @@ pub struct Form {
 
 impl Form {
     pub const fn new() -> Self {
-        Self { children: Vec::new() }
+        Self {
+            children: Vec::new(),
+        }
     }
 
     pub fn with_input(mut self, input: Input) -> Self {
@@ -52,7 +54,7 @@ impl Form {
 }
 
 impl Extend<Html> for Form {
-    fn extend<T: IntoIterator<Item=Html>>(&mut self, iter: T) {
+    fn extend<T: IntoIterator<Item = Html>>(&mut self, iter: T) {
         self.children.extend(iter);
     }
 }
@@ -84,7 +86,9 @@ pub struct Div {
 
 impl Div {
     pub const fn new() -> Self {
-        Self { children: Vec::new() }
+        Self {
+            children: Vec::new(),
+        }
     }
 
     pub fn with_child(mut self, child: Html) -> Self {

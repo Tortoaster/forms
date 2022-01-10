@@ -2,9 +2,9 @@
 
 use std::io::Cursor;
 
-use rocket::{Request, Response};
 use rocket::http::ContentType;
 use rocket::response::Responder;
+use rocket::{Request, Response};
 
 use crate::component::Component;
 use crate::task::Task;
