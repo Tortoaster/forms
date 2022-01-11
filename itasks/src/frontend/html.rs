@@ -1,46 +1,45 @@
-use crate::frontend::form::{Form, Input, Value};
+use crate::frontend::form::{Form, Input, InputValue};
 
 impl Form {
     pub fn as_html(&self) -> String {
-        let fields = match self {
-            Form::Unit(input, hint) => input.as_html(hint),
-            Form::Compound(inputs) => inputs
+        format!(
+            "<form>{}</form>",
+            self.inputs
                 .iter()
-                .map(Form::as_html)
+                .map(|input| input.as_html(self.readonly))
                 .collect::<Vec<_>>()
-                .join("<br/>"),
-        };
-
-        format!("<form>{}</form>", fields)
+                .join("<br/>")
+        )
     }
 }
 
 impl Input {
-    pub fn as_html(&self, hint: &str) -> String {
+    pub fn as_html(&self, readonly: bool) -> String {
         match &self.value {
-            Value::Text(text) => format!(
+            InputValue::Form(form) => form.as_html(),
+            InputValue::Text(text) => format!(
                 "<input placeholder=\"{}\" value=\"{}\" {}/>",
-                hint,
+                self.hint,
                 text,
-                self.readonly.then(|| "readonly").unwrap_or_default()
+                readonly.then(|| "readonly").unwrap_or_default()
             ),
-            Value::Character(character) => format!(
+            InputValue::Character(character) => format!(
                 "<input placeholder=\"{}\" value=\"{}\" max_length=\"1\" {}/>",
-                hint,
+                self.hint,
                 character,
-                self.readonly.then(|| "readonly").unwrap_or_default()
+                readonly.then(|| "readonly").unwrap_or_default()
             ),
-            Value::Number(number) => format!(
+            InputValue::Number(number) => format!(
                 "<input placeholder=\"{}\" type=\"number\" value=\"{}\" {}/>",
-                hint,
+                self.hint,
                 number,
-                self.readonly.then(|| "readonly").unwrap_or_default()
+                readonly.then(|| "readonly").unwrap_or_default()
             ),
-            Value::Truth(truth) => format!(
+            InputValue::Truth(truth) => format!(
                 "<label>{}: <input type=\"checkbox\" {} {}/></label>",
-                hint,
+                self.hint,
                 truth.then(|| "checked").unwrap_or_default(),
-                self.readonly.then(|| "readonly").unwrap_or_default()
+                readonly.then(|| "readonly").unwrap_or_default()
             ),
         }
     }

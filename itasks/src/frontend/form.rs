@@ -1,34 +1,23 @@
-pub enum Form {
-    Compound(Vec<Form>),
-    Unit(Input, String),
-}
+use std::iter::FromIterator;
 
-impl Form {
-    pub fn with_hint(self, hint: String) -> Self {
-        match self {
-            Form::Compound(forms) => Form::Compound(forms),
-            Form::Unit(input, _) => Form::Unit(input, hint),
-        }
-    }
-}
-
-impl From<Input> for Form {
-    fn from(input: Input) -> Self {
-        Form::Unit(input, String::new())
-    }
-}
-
-pub struct Input {
-    pub(in crate::frontend) value: Value,
+pub struct Form {
+    pub(crate) title: Option<String>,
+    pub(crate) inputs: Vec<Input>,
     pub(in crate::frontend) readonly: bool,
 }
 
-impl Input {
-    pub fn new(value: Value) -> Self {
-        Input {
-            value,
+impl Form {
+    pub fn new(inputs: Vec<Input>) -> Self {
+        Form {
+            title: None,
+            inputs,
             readonly: false,
         }
+    }
+
+    pub fn with_title(mut self, title: String) -> Self {
+        self.title = Some(title);
+        self
     }
 
     pub fn readonly(mut self) -> Self {
@@ -37,7 +26,46 @@ impl Input {
     }
 }
 
-pub enum Value {
+impl IntoIterator for Form {
+    type Item = Input;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        match &self.title {
+            None => self.inputs.into_iter(),
+            Some(_) => vec![Input::new(InputValue::Form(self))].into_iter(),
+        }
+    }
+}
+
+impl FromIterator<Input> for Form {
+    fn from_iter<T: IntoIterator<Item = Input>>(iter: T) -> Self {
+        let inputs: Vec<Input> = iter.into_iter().collect();
+        Form::new(inputs)
+    }
+}
+
+pub struct Input {
+    pub(in crate::frontend) value: InputValue,
+    pub(in crate::frontend) hint: String,
+}
+
+impl Input {
+    pub fn new(value: InputValue) -> Self {
+        Input {
+            value,
+            hint: String::new(),
+        }
+    }
+
+    pub fn with_hint(mut self, hint: String) -> Self {
+        self.hint = hint;
+        self
+    }
+}
+
+pub enum InputValue {
+    Form(Form),
     Text(String),
     Character(char),
     Number(i32),

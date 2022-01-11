@@ -12,15 +12,15 @@ struct Person {
     cool: bool,
 }
 
-#[get("/")]
-fn index() -> Task<(Person, Person)> {
-    let me = Person {
-        name: "Rick".to_string(),
-        age: 22,
-        cool: true,
-    };
+#[derive(Component)]
+struct Porson {
+    person: Person,
+    lol: bool,
+}
 
-    enter().and(view(me))
+#[get("/")]
+fn index() -> Task<Porson> {
+    enter()
 }
 
 // #[get("/test")]

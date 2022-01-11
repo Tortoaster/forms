@@ -1,23 +1,26 @@
 use std::marker::PhantomData;
 
 use crate::component::Component;
-use crate::frontend::Form;
+use crate::frontend::{Form, Input, InputValue};
 
 pub struct Task<C> {
-    pub content: Form,
+    pub form: Form,
     phantom: PhantomData<C>,
 }
 
 impl<C: Component> Task<C> {
-    fn new(content: Form) -> Task<C> {
+    fn new(form: Form) -> Task<C> {
         Task {
-            content,
+            form,
             phantom: Default::default(),
         }
     }
 
     pub fn and<D: Component>(self, other: Task<D>) -> Task<(C, D)> {
-        Task::new(Form::Compound(vec![self.content, other.content]))
+        Task::new(Form::new(vec![
+            Input::new(InputValue::Form(self.form)),
+            Input::new(InputValue::Form(other.form)),
+        ]))
     }
 
     pub fn actions<D>(self) -> Actions<C, D> {
@@ -40,7 +43,7 @@ impl<C, D> Actions<C, D> {
 
     pub fn finalize(self) -> Task<D> {
         Task {
-            content: self.task.content,
+            form: self.task.form,
             phantom: Default::default(),
         }
     }
