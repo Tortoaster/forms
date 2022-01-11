@@ -47,19 +47,16 @@ impl FromIterator<Input> for Form {
 
 pub struct Input {
     pub(in crate::frontend) value: InputValue,
-    pub(in crate::frontend) hint: String,
+    pub(in crate::frontend) hint: Option<String>,
 }
 
 impl Input {
     pub fn new(value: InputValue) -> Self {
-        Input {
-            value,
-            hint: String::new(),
-        }
+        Input { value, hint: None }
     }
 
     pub fn with_hint(mut self, hint: String) -> Self {
-        self.hint = hint;
+        self.hint = Some(hint);
         self
     }
 }
