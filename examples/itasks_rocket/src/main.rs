@@ -33,7 +33,11 @@ fn index() -> Task<People> {
 
 #[rocket::main]
 async fn main() -> Result<(), Box<Error>> {
-    rocket::build().mount("/", routes![index]).launch().await?;
+    rocket::build()
+        .mount("/", routes![index])
+        .attach(itasks::backend::ITasks)
+        .launch()
+        .await?;
 
     Ok(())
 }

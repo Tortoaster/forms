@@ -1,18 +1,18 @@
 /* WHITE: #FFFFFF */
-/* LIGHTGRAY: #E2EBF3 */
+/* LIGHTGRAY: #DFE3E8 */
 /* BLUE: #6D99C5 */
 /* DARKBLUE: #00303D */
 /* ORANGE: #FF9933 */
 
 html, body {
-    background-color: #E2EBF3;
+    background-color: #DFE3E8;
     font-family: "Century Gothic", sans-serif;
     margin: 0;
     padding: 0.5em;
 }
 
 .component {
-    border: 1pt solid #E2EBF3;
+    border: 1pt solid #DFE3E8;
     border-radius: 0.5em;
     display: inline-block;
     margin: 0.5em;
