@@ -13,13 +13,13 @@ struct Person {
 }
 
 #[derive(Component)]
-struct Porson {
+struct People {
     person: Person,
     lol: bool,
 }
 
 #[get("/")]
-fn index() -> Task<Porson> {
+fn index() -> Task<People> {
     enter()
 }
 

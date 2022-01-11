@@ -10,13 +10,13 @@ impl Form {
     }
 
     fn write_html(&self, s: &mut String) -> std::fmt::Result {
-        write!(s, "<div>")?;
+        write!(s, "<div class=\"component\">")?;
 
         if let Some(title) = &self.title {
-            write!(s, "<h3>{}</h3>", title)?;
+            write!(s, "<div class=\"title\">{}</div>", title)?;
         }
 
-        write!(s, "<form>")?;
+        write!(s, "<div class=\"content\">")?;
         write!(
             s,
             "{}",
@@ -26,7 +26,7 @@ impl Form {
                 .collect::<Result<Vec<_>, _>>()?
                 .join("<br/>")
         )?;
-        write!(s, "</form>")?;
+        write!(s, "</div>")?;
 
         write!(s, "</div>")
     }
