@@ -52,25 +52,24 @@ fn impl_component_named(
     quote! {
         impl #impl_generics Component for #ident #ty_generics #where_clause {
             fn view(&self) -> Form {
-                // .with_hint(stringify!(#idents).to_case(Case::Title))
                 let inputs = vec![
-                    #(self.#idents.view(),)*
+                    #(self.#idents.view().with_hint(stringify!(#idents).to_case(Case::Title)),)*
                 ];
-                Form::new(inputs.into_iter().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title)).readonly()
+                Form::new(inputs.into_iter().flatten().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title)).readonly()
             }
 
             fn enter() -> Form {
                 let inputs = vec![
-                    #(#types::enter(),)*
+                    #(#types::enter().with_hint(stringify!(#idents).to_case(Case::Title)),)*
                 ];
-                Form::new(inputs.into_iter().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title))
+                Form::new(inputs.into_iter().flatten().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title))
             }
 
             fn update(&self) -> Form {
                 let inputs = vec![
-                    #(self.#idents.update(),)*
+                    #(self.#idents.update().with_hint(stringify!(#idents).to_case(Case::Title)),)*
                 ];
-                Form::new(inputs.into_iter().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title))
+                Form::new(inputs.into_iter().flatten().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title))
             }
         }
     }

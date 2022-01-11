@@ -20,6 +20,11 @@ impl Form {
         self
     }
 
+    pub fn with_hint(mut self, hint: String) -> Result<Self, &'static str> {
+        self.inputs.first_mut().ok_or("no inputs")?.hint = Some(hint);
+        Ok(self)
+    }
+
     pub fn readonly(mut self) -> Self {
         self.readonly = true;
         self
