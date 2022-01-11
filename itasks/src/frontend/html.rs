@@ -37,9 +37,9 @@ impl Input {
                 self.readonly.then(|| "readonly").unwrap_or_default()
             ),
             Value::Truth(truth) => format!(
-                "<label>{}: <input type=\"checkbox\" value=\"{}\" {}/></label>",
+                "<label>{}: <input type=\"checkbox\" {} {}/></label>",
                 hint,
-                truth,
+                truth.then(|| "checked").unwrap_or_default(),
                 self.readonly.then(|| "readonly").unwrap_or_default()
             ),
         }
