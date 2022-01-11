@@ -52,6 +52,7 @@ impl Input {
                 if let Some(hint) = &self.hint {
                     write!(s, " placeholder=\"{}\"", hint)?;
                 }
+                write!(s, " type=\"text\"")?;
                 write!(s, " value=\"{}\"", text)?;
                 if readonly {
                     write!(s, " readonly")?;
@@ -63,8 +64,9 @@ impl Input {
                 if let Some(hint) = &self.hint {
                     write!(s, " placeholder=\"{}\"", hint)?;
                 }
-                write!(s, " max_length=\"1\"")?;
+                write!(s, " type=\"text\"")?;
                 write!(s, " value=\"{}\"", character)?;
+                write!(s, " max_length=\"1\"")?;
                 if readonly {
                     write!(s, " readonly")?;
                 }

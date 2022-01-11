@@ -1,27 +1,59 @@
 /* WHITE: #FFFFFF */
 /* LIGHTGRAY: #DFE3E8 */
-/* BLUE: #6D99C5 */
+/* BLUE: #5D9DF0 */
 /* DARKBLUE: #00303D */
 /* ORANGE: #FF9933 */
 
 html, body {
     background-color: #DFE3E8;
     font-family: "Century Gothic", sans-serif;
+    font-size: 1.4em;
     margin: 0;
+}
+
+body {
+    padding: 1em;
+}
+
+.container {
+    margin: 0 auto;
+    width: 61.8%;
+}
+
+input {
+    font-size: inherit;
+}
+
+input:not(:last-child) {
+    margin-bottom: 0.5em;
+}
+
+input[type=text], input[type=number] {
+    background-color: #DFE3E8;
+    border: none;
+    border-radius: 0.5em;
+    box-sizing: border-box;
+    color: #00303D;
     padding: 0.5em;
+    width: 100%;
+}
+
+input[type=checkbox] {
+    margin: 0;
+    width: 1em;
+    height: 1em;
 }
 
 .component {
-    border: 1pt solid #DFE3E8;
+    border: 0.1em solid #DFE3E8;
     border-radius: 0.5em;
     display: inline-block;
-    margin: 0.5em;
-    min-width: 20em;
+    width: 100%;
     overflow: hidden;
 }
 
 .title {
-    background-color: #6D99C5;
+    background-color: #5D9DF0;
     color: #FFFFFF;
     font-weight: bold;
     padding: 0.5em;
@@ -30,7 +62,7 @@ html, body {
 .content {
     background-color: #FFFFFF;
     color: #00303D;
-    padding: 0.5em;
+    padding: 1em;
 }
 
 .content:empty {
