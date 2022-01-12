@@ -53,21 +53,21 @@ fn impl_component_named(
         impl #impl_generics Component for #ident #ty_generics #where_clause {
             fn view(&self) -> Form {
                 let inputs = vec![
-                    #(self.#idents.view().with_hint(stringify!(#idents).to_case(Case::Title)),)*
+                    #(self.#idents.view().into_iter().collect::<Form>().with_hint(stringify!(#idents).to_case(Case::Title)),)*
                 ];
                 Form::new(inputs.into_iter().flatten().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title)).readonly()
             }
 
             fn enter() -> Form {
                 let inputs = vec![
-                    #(#types::enter().with_hint(stringify!(#idents).to_case(Case::Title)),)*
+                    #(#types::enter().into_iter().collect::<Form>().with_hint(stringify!(#idents).to_case(Case::Title)),)*
                 ];
                 Form::new(inputs.into_iter().flatten().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title))
             }
 
             fn update(&self) -> Form {
                 let inputs = vec![
-                    #(self.#idents.update().with_hint(stringify!(#idents).to_case(Case::Title)),)*
+                    #(self.#idents.update().into_iter().collect::<Form>().with_hint(stringify!(#idents).to_case(Case::Title)),)*
                 ];
                 Form::new(inputs.into_iter().flatten().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title))
             }
