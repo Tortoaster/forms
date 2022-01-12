@@ -7,7 +7,7 @@ use quote::{quote, quote_spanned};
 use syn::spanned::Spanned;
 use syn::{
     parse_macro_input, Data, DataEnum, DataStruct, DeriveInput, Fields, FieldsNamed, FieldsUnnamed,
-    Generics, Type,
+    Generics, Index, Type,
 };
 
 #[proc_macro_derive(Component)]
@@ -76,62 +76,40 @@ fn impl_component_named(
 }
 
 fn impl_component_unnamed(
-    name: Ident,
+    ident: Ident,
     fields_unnamed: FieldsUnnamed,
     generics: Generics,
 ) -> TokenStream2 {
-    let views: TokenStream2 = (0..fields_unnamed.unnamed.len())
-        .map(syn::Index::from)
-        .flat_map(|index| {
-            quote! {
-                format!("{}", self.#index.view())
-            }
-        })
-        .collect();
-
-    let enters: TokenStream2 = fields_unnamed
+    let (idents, types): (Vec<Index>, Vec<Type>) = fields_unnamed
         .unnamed
-        .iter()
-        .flat_map(|field| {
-            let ty = &field.ty;
-            quote! {
-                format!("{}", #ty::enter())
-            }
-        })
-        .collect();
-
-    let updates: TokenStream2 = (0..fields_unnamed.unnamed.len())
-        .map(syn::Index::from)
-        .flat_map(|index| {
-            quote! {
-                format!("{}", self.#index.update())
-            }
-        })
-        .collect();
+        .into_iter()
+        .enumerate()
+        .map(|(index, field)| (index.into(), field.ty))
+        .unzip();
 
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
 
     quote! {
-        impl #impl_generics Component for #name #ty_generics #where_clause {
-            fn view(&self) -> String {
-                let fields = vec![
-                    #views
+        impl #impl_generics Component for #ident #ty_generics #where_clause {
+            fn view(&self) -> Form {
+                let inputs = vec![
+                    #(self.#idents.view().into_iter().collect::<Form>(),)*
                 ];
-                format!("<div class=\"component\"><div class=\"title\">{}</div><div class=\"content\">{}</div></div>", stringify!(#name), fields.join("<hr/>"))
+                Form::new(inputs.into_iter().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title)).readonly()
             }
 
-            fn enter() -> String {
-                let fields = vec![
-                    #enters
+            fn enter() -> Form {
+                let inputs = vec![
+                    #(#types::enter().into_iter().collect::<Form>(),)*
                 ];
-                format!("<div class=\"component\"><div class=\"title\">{}</div><div class=\"content\">{}</div></div>", stringify!(#name), fields.join("<hr/>"))
+                Form::new(inputs.into_iter().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title))
             }
 
-            fn update(&self) -> String {
-                let fields = vec![
-                    #updates
+            fn update(&self) -> Form {
+                let inputs = vec![
+                    #(self.#idents.update().into_iter().collect::<Form>(),)*
                 ];
-                format!("<div class=\"component\"><div class=\"title\">{}</div><div class=\"content\">{}</div></div>", stringify!(#name), fields.join("<hr/>"))
+                Form::new(inputs.into_iter().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title))
             }
         }
     }
@@ -142,16 +120,16 @@ fn impl_component_unit(ident: Ident, generics: Generics) -> TokenStream2 {
 
     quote! {
         impl #impl_generics Component for #ident #ty_generics #where_clause {
-            fn view(&self) -> String {
-                format!("<div class=\"component\"><div class=\"title\">{}</div></div>", stringify!(#ident))
+            fn view(&self) -> Form {
+                Form::new(Vec::new()).with_title(stringify!(#ident).to_case(Case::Title)).readonly()
             }
 
-            fn enter() -> String {
-                format!("<div class=\"component\"><div class=\"title\">{}</div></div>", stringify!(#ident))
+            fn enter() -> Form {
+                Form::new(Vec::new()).with_title(stringify!(#ident).to_case(Case::Title))
             }
 
-            fn update(&self) -> String {
-                format!("<div class=\"component\"><div class=\"title\">{}</div></div>", stringify!(#ident))
+            fn update(&self) -> Form {
+                Form::new(Vec::new()).with_title(stringify!(#ident).to_case(Case::Title))
             }
         }
     }

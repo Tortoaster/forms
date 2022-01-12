@@ -6,30 +6,23 @@ use rocket::error::Error;
 use itasks::prelude::*;
 
 #[derive(Component)]
-struct Person {
-    name: String,
-    age: u8,
-    cool: bool,
-}
+struct UnitStruct;
 
 #[derive(Component)]
-struct People {
-    person: Person,
-    lol: bool,
+struct TupleStruct(String, i32, bool, UnitStruct);
+
+#[derive(Component)]
+struct NamedStruct {
+    name: String,
+    number: i32,
+    works: bool,
+    tuple_struct: TupleStruct,
 }
 
 #[get("/")]
-fn index() -> Task<People> {
+fn index() -> Task<NamedStruct> {
     enter()
 }
-
-// #[get("/test")]
-// fn test() -> Task<Person> {
-//     view("Welcome!")
-//         .actions()
-//         .on(Action::Ok, |_| index())
-//         .finalize()
-// }
 
 #[rocket::main]
 async fn main() -> Result<(), Box<Error>> {
