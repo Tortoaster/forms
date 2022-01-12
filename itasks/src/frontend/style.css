@@ -20,6 +20,10 @@ body {
     width: 61.8%;
 }
 
+.container > .component > .title {
+    background-color: #5D9DF0;
+}
+
 input {
     font-size: inherit;
 }
@@ -47,13 +51,18 @@ input[type=checkbox] {
 .component {
     border: 0.1em solid #DFE3E8;
     border-radius: 0.5em;
+    box-sizing: border-box;
     display: inline-block;
     width: 100%;
     overflow: hidden;
 }
 
+.component:not(:last-child) {
+    margin-bottom: 0.5em;
+}
+
 .title {
-    background-color: #5D9DF0;
+    background-color: #DFE3E8;
     color: #FFFFFF;
     font-weight: bold;
     padding: 0.5em;
