@@ -110,6 +110,22 @@ impl Input {
                     write!(s, "</label>")
                 }
             },
+            InputValue::Choice(choices, value) => {
+                write!(
+                    s,
+                    "{}",
+                    choices
+                        .iter()
+                        .map(|(title, form)| Ok(format!(
+                            "<input type=\"radio\" value=\"{}\" {}/><div class=\"choice\">{}</div>",
+                            title,
+                            if title == value { "checked" } else { "" },
+                            form.as_html()?,
+                        )))
+                        .collect::<Result<Vec<_>, _>>()?
+                        .join("<br/>")
+                )
+            }
         }
     }
 }

@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::iter::FromIterator;
 
 pub struct Form {
@@ -72,4 +73,5 @@ pub enum InputValue {
     Character(char),
     Number(i32),
     Truth(bool),
+    Choice(BTreeMap<String, Form>, String),
 }

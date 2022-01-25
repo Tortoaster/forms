@@ -19,9 +19,20 @@ struct NamedStruct {
     tuple_struct: TupleStruct,
 }
 
+#[derive(Component)]
+enum Enum {
+    Unit,
+    Tuple(u8, bool),
+    Named { number: u8, truth: bool },
+}
+
 #[get("/")]
-fn index() -> Task<NamedStruct> {
-    enter()
+fn index() -> Task<Enum> {
+    let e = Enum::Named {
+        number: 8,
+        truth: true,
+    };
+    update(e)
 }
 
 #[rocket::main]

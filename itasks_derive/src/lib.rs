@@ -3,7 +3,7 @@ extern crate proc_macro;
 use proc_macro::TokenStream;
 
 use proc_macro2::{Ident, TokenStream as TokenStream2};
-use quote::{quote, quote_spanned};
+use quote::quote;
 use syn::spanned::Spanned;
 use syn::{
     parse_macro_input, Data, DataEnum, DataStruct, DeriveInput, Fields, FieldsNamed, FieldsUnnamed,
@@ -29,144 +29,204 @@ fn impl_component_struct(
     data_struct: DataStruct,
     generics: Generics,
 ) -> TokenStream2 {
-    match data_struct.fields {
-        Fields::Named(fields_named) => impl_component_named(ident, fields_named, generics),
-        Fields::Unnamed(fields_unnamed) => impl_component_unnamed(ident, fields_unnamed, generics),
-        Fields::Unit => impl_component_unit(ident, generics),
+    let ([view, enter, update], idents) = forms_fields(ident.clone(), data_struct.fields.clone());
+
+    let (values, idents): (Vec<TokenStream2>, Vec<Ident>) = idents
+        .into_iter()
+        .enumerate()
+        .map(|(index, ident)| match ident {
+            None => {
+                let i = Index::from(index);
+                (quote! { &self.#i }, unnamed_ident(index, &ident))
+            }
+            Some(ident) => (quote! { &self.#ident }, ident),
+        })
+        .unzip();
+
+    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+
+    quote! {
+        impl #impl_generics Component for #ident #ty_generics #where_clause {
+            fn view(&self) -> Form {
+                #(let #idents = #values;)*
+                #view
+            }
+
+            fn enter() -> Form {
+                #enter
+            }
+
+            fn update(&self) -> Form {
+                #(let #idents = #values;)*
+                #update
+            }
+        }
     }
 }
 
-fn impl_component_named(
-    ident: Ident,
-    fields_named: FieldsNamed,
-    generics: Generics,
-) -> TokenStream2 {
+fn impl_component_enum(enum_ident: Ident, data_enum: DataEnum, generics: Generics) -> TokenStream2 {
+    let (idents, x): (Vec<_>, Vec<_>) = data_enum
+        .variants
+        .into_iter()
+        .map(|variant| {
+            let variant_ident = variant.ident;
+            let fields = fields_idents(&variant.fields);
+            let ([view, enter, update], _) = forms_fields(variant_ident.clone(), variant.fields);
+            let arm = quote! { #enum_ident::#variant_ident#fields };
+            (variant_ident, (arm, (view, (enter, update))))
+        })
+        .unzip();
+    let (arms, x): (Vec<_>, Vec<_>) = x.into_iter().unzip();
+    let (views, x): (Vec<_>, Vec<_>) = x.into_iter().unzip();
+    let (enters, updates): (Vec<_>, Vec<_>) = x.into_iter().unzip();
+
+    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+
+    quote! {
+        impl #impl_generics Component for #enum_ident #ty_generics #where_clause {
+            fn view(&self) -> Form {
+                match self {
+                    #(#arms => #views,)*
+                }
+            }
+
+            fn enter() -> Form {
+                let choices = vec![
+                    #((stringify!(#idents).to_case(Case::Title), #enters),)*
+                ];
+                let choice = choices.get(0).map(|choice| choice.0.clone()).unwrap_or_default();
+                Form::new(vec![Input::new(InputValue::Choice(choices.into_iter().collect(), choice))])
+                    .with_title(stringify!(#enum_ident).to_case(Case::Title))
+            }
+
+            fn update(&self) -> Form {
+                match self {
+                    #(#arms => #updates,)*
+                }
+            }
+        }
+    }
+}
+
+fn forms_fields(ident: Ident, fields: Fields) -> ([TokenStream2; 3], Vec<Option<Ident>>) {
+    match fields {
+        Fields::Named(fields_named) => forms_named(ident, fields_named),
+        Fields::Unnamed(fields_unnamed) => forms_unnamed(ident, fields_unnamed),
+        Fields::Unit => forms_unit(ident),
+    }
+}
+
+fn forms_named(ident: Ident, fields_named: FieldsNamed) -> ([TokenStream2; 3], Vec<Option<Ident>>) {
     let (idents, types): (Vec<Option<Ident>>, Vec<Type>) = fields_named
         .named
         .into_iter()
         .map(|field| (field.ident, field.ty))
         .unzip();
 
-    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+    let view = quote! {
+        Form::new(vec![
+            #(#idents.view().into_iter().collect::<Form>().with_hint(stringify!(#idents).to_case(Case::Title)),)*
+        ].into_iter().flatten().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title)).readonly()
+    };
 
-    quote! {
-        impl #impl_generics Component for #ident #ty_generics #where_clause {
-            fn view(&self) -> Form {
-                let inputs = vec![
-                    #(self.#idents.view().into_iter().collect::<Form>().with_hint(stringify!(#idents).to_case(Case::Title)),)*
-                ];
-                Form::new(inputs.into_iter().flatten().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title)).readonly()
-            }
+    let enter = quote! {
+        Form::new(vec![
+            #(#types::enter().into_iter().collect::<Form>().with_hint(stringify!(#idents).to_case(Case::Title)),)*
+        ].into_iter().flatten().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title))
+    };
 
-            fn enter() -> Form {
-                let inputs = vec![
-                    #(#types::enter().into_iter().collect::<Form>().with_hint(stringify!(#idents).to_case(Case::Title)),)*
-                ];
-                Form::new(inputs.into_iter().flatten().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title))
-            }
+    let update = quote! {
+        Form::new(vec![
+            #(#idents.update().into_iter().collect::<Form>().with_hint(stringify!(#idents).to_case(Case::Title)),)*
+        ].into_iter().flatten().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title))
+    };
 
-            fn update(&self) -> Form {
-                let inputs = vec![
-                    #(self.#idents.update().into_iter().collect::<Form>().with_hint(stringify!(#idents).to_case(Case::Title)),)*
-                ];
-                Form::new(inputs.into_iter().flatten().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title))
-            }
-        }
-    }
+    ([view, enter, update], idents)
 }
 
-fn impl_component_unnamed(
+fn forms_unnamed(
     ident: Ident,
     fields_unnamed: FieldsUnnamed,
-    generics: Generics,
-) -> TokenStream2 {
-    let (idents, types): (Vec<Index>, Vec<Type>) = fields_unnamed
+) -> ([TokenStream2; 3], Vec<Option<Ident>>) {
+    let (idents, types): (Vec<Ident>, Vec<Type>) = fields_unnamed
         .unnamed
         .into_iter()
         .enumerate()
-        .map(|(index, field)| (index.into(), field.ty))
+        .map(|(index, field)| (unnamed_ident(index, &field.ident), field.ty))
         .unzip();
 
-    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+    let view = quote! {
+        Form::new(vec![
+            #(#idents.view().into_iter().collect::<Form>(),)*
+        ].into_iter().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title)).readonly()
+    };
 
-    quote! {
-        impl #impl_generics Component for #ident #ty_generics #where_clause {
-            fn view(&self) -> Form {
-                let inputs = vec![
-                    #(self.#idents.view().into_iter().collect::<Form>(),)*
-                ];
-                Form::new(inputs.into_iter().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title)).readonly()
-            }
+    let enter = quote! {
+        Form::new(vec![
+            #(#types::enter().into_iter().collect::<Form>(),)*
+        ].into_iter().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title))
+    };
 
-            fn enter() -> Form {
-                let inputs = vec![
-                    #(#types::enter().into_iter().collect::<Form>(),)*
-                ];
-                Form::new(inputs.into_iter().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title))
-            }
+    let update = quote! {
+        Form::new(vec![
+            #(#idents.update().into_iter().collect::<Form>(),)*
+        ].into_iter().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title))
+    };
 
-            fn update(&self) -> Form {
-                let inputs = vec![
-                    #(self.#idents.update().into_iter().collect::<Form>(),)*
-                ];
-                Form::new(inputs.into_iter().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title))
-            }
-        }
-    }
+    let idents = idents.into_iter().map(|_| None).collect();
+
+    ([view, enter, update], idents)
 }
 
-fn impl_component_unit(ident: Ident, generics: Generics) -> TokenStream2 {
-    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+fn forms_unit(ident: Ident) -> ([TokenStream2; 3], Vec<Option<Ident>>) {
+    let view = quote! {
+        Form::new(Vec::new())
+            .with_title(stringify!(#ident).to_case(Case::Title))
+            .readonly()
+    };
 
-    quote! {
-        impl #impl_generics Component for #ident #ty_generics #where_clause {
-            fn view(&self) -> Form {
-                Form::new(Vec::new()).with_title(stringify!(#ident).to_case(Case::Title)).readonly()
-            }
+    let enter = quote! {
+        Form::new(Vec::new())
+            .with_title(stringify!(#ident)
+            .to_case(Case::Title))
+    };
 
-            fn enter() -> Form {
-                Form::new(Vec::new()).with_title(stringify!(#ident).to_case(Case::Title))
-            }
+    let update = quote! {
+        Form::new(Vec::new())
+            .with_title(stringify!(#ident)
+            .to_case(Case::Title))
+    };
 
-            fn update(&self) -> Form {
-                Form::new(Vec::new()).with_title(stringify!(#ident).to_case(Case::Title))
-            }
-        }
-    }
+    let idents = Vec::new();
+
+    ([view, enter, update], idents)
 }
 
-fn impl_component_enum(ident: Ident, data_enum: DataEnum, generics: Generics) -> TokenStream2 {
-    let matches: TokenStream2 = data_enum.variants.iter().flat_map(|variant| {
-        let variant_name = &variant.ident;
+fn unnamed_ident(index: usize, ident: &Option<Ident>) -> Ident {
+    Ident::new(format!("p{}", index).as_str(), ident.span())
+}
 
-        let variant_fields = match &variant.fields {
-            Fields::Named(_) => quote_spanned! {variant.fields.span()=> {..} },
-            Fields::Unnamed(_) => quote_spanned! {variant.fields.span()=> (..) },
-            Fields::Unit => quote_spanned! { variant.fields.span()=> },
-        };
+fn fields_idents(fields: &Fields) -> TokenStream2 {
+    match fields {
+        Fields::Named(fields_named) => {
+            let fields: Vec<_> = fields_named
+                .named
+                .iter()
+                .map(|field| &field.ident)
+                .collect();
 
-        quote_spanned! {variant.span()=>
-            #ident::#variant_name #variant_fields => format!("<div class=\"component\"><div class=\"title\">{}</div><div class=\"subtitle\">{}</div><div class=\"content\"></div></div>", stringify!(#ident), stringify!(#variant_name)),
+            quote! { { #(#fields,)* } }
         }
-    }).collect();
+        Fields::Unnamed(fields_unnamed) => {
+            let fields: Vec<_> = fields_unnamed
+                .unnamed
+                .iter()
+                .enumerate()
+                .map(|(index, field)| unnamed_ident(index, &field.ident))
+                .collect();
 
-    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
-
-    quote! {
-        impl #impl_generics Component for #ident #ty_generics #where_clause {
-            fn view(&self) -> String {
-                match self {
-                    #matches
-                }
-            }
-
-            fn enter() -> String {
-
-            }
-
-            fn update(&self) -> String {
-
-            }
+            quote! { (#(#fields,)*) }
         }
+        Fields::Unit => quote! {},
     }
 }
