@@ -10,12 +10,14 @@ use syn::{
     Generics, Index, Type,
 };
 
+/// Implements `Component` for a struct or enum.
 #[proc_macro_derive(Component)]
 pub fn component_derive(input: TokenStream) -> TokenStream {
     let ast: DeriveInput = parse_macro_input!(input as DeriveInput);
     impl_component(ast).into()
 }
 
+/// Implements `Component` for a struct or enum.
 fn impl_component(ast: DeriveInput) -> TokenStream2 {
     match ast.data {
         Data::Struct(data_struct) => impl_component_struct(ast.ident, data_struct, ast.generics),
@@ -24,31 +26,21 @@ fn impl_component(ast: DeriveInput) -> TokenStream2 {
     }
 }
 
+/// Implements `Component` for a struct.
 fn impl_component_struct(
     ident: Ident,
     data_struct: DataStruct,
     generics: Generics,
 ) -> TokenStream2 {
-    let ([view, enter, update], idents) = forms_fields(ident.clone(), data_struct.fields.clone());
-
-    let (values, idents): (Vec<TokenStream2>, Vec<Ident>) = idents
-        .into_iter()
-        .enumerate()
-        .map(|(index, ident)| match ident {
-            None => {
-                let i = Index::from(index);
-                (quote! { &self.#i }, unnamed_ident(index, &ident))
-            }
-            Some(ident) => (quote! { &self.#ident }, ident),
-        })
-        .unzip();
+    let idents = fields_idents_struct(&data_struct.fields);
+    let [view, enter, update] = forms_fields(&ident, &data_struct.fields);
 
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
 
     quote! {
         impl #impl_generics Component for #ident #ty_generics #where_clause {
             fn view(&self) -> Form {
-                #(let #idents = #values;)*
+                #idents
                 #view
             }
 
@@ -57,21 +49,22 @@ fn impl_component_struct(
             }
 
             fn update(&self) -> Form {
-                #(let #idents = #values;)*
+                #idents
                 #update
             }
         }
     }
 }
 
+/// Implements `Component` for an enum.
 fn impl_component_enum(enum_ident: Ident, data_enum: DataEnum, generics: Generics) -> TokenStream2 {
     let (idents, x): (Vec<_>, Vec<_>) = data_enum
         .variants
         .into_iter()
         .map(|variant| {
             let variant_ident = variant.ident;
-            let fields = fields_idents(&variant.fields);
-            let ([view, enter, update], _) = forms_fields(variant_ident.clone(), variant.fields);
+            let fields = fields_idents_variant(&variant.fields);
+            let [view, enter, update] = forms_fields(&variant_ident, &variant.fields);
             let arm = quote! { #enum_ident::#variant_ident#fields };
             (variant_ident, (arm, (view, (enter, update))))
         })
@@ -108,19 +101,26 @@ fn impl_component_enum(enum_ident: Ident, data_enum: DataEnum, generics: Generic
     }
 }
 
-fn forms_fields(ident: Ident, fields: Fields) -> ([TokenStream2; 3], Vec<Option<Ident>>) {
+/// Generates form representations for any type of struct or variant.
+///
+/// Assumes all fields of the struct are already in scope, either with their own identifiers for
+/// structs, or with identifiers `p0`, `p1`, ... for tuple structs.
+fn forms_fields(ident: &Ident, fields: &Fields) -> [TokenStream2; 3] {
     match fields {
-        Fields::Named(fields_named) => forms_named(ident, fields_named),
-        Fields::Unnamed(fields_unnamed) => forms_unnamed(ident, fields_unnamed),
+        Fields::Named(fields_named) => forms_struct(ident, fields_named),
+        Fields::Unnamed(fields_unnamed) => forms_tuple(ident, fields_unnamed),
         Fields::Unit => forms_unit(ident),
     }
 }
 
-fn forms_named(ident: Ident, fields_named: FieldsNamed) -> ([TokenStream2; 3], Vec<Option<Ident>>) {
-    let (idents, types): (Vec<Option<Ident>>, Vec<Type>) = fields_named
+/// Generates form representations for a struct or struct variant.
+///
+/// Assumes all fields of the struct are already in scope with their own identifiers.
+fn forms_struct(ident: &Ident, fields_named: &FieldsNamed) -> [TokenStream2; 3] {
+    let (idents, types): (Vec<&Option<Ident>>, Vec<&Type>) = fields_named
         .named
-        .into_iter()
-        .map(|field| (field.ident, field.ty))
+        .iter()
+        .map(|field| (&field.ident, &field.ty))
         .unzip();
 
     let view = quote! {
@@ -141,18 +141,18 @@ fn forms_named(ident: Ident, fields_named: FieldsNamed) -> ([TokenStream2; 3], V
         ].into_iter().flatten().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title))
     };
 
-    ([view, enter, update], idents)
+    [view, enter, update]
 }
 
-fn forms_unnamed(
-    ident: Ident,
-    fields_unnamed: FieldsUnnamed,
-) -> ([TokenStream2; 3], Vec<Option<Ident>>) {
-    let (idents, types): (Vec<Ident>, Vec<Type>) = fields_unnamed
+/// Generates form representations for a tuple struct or variant.
+///
+/// Assumes all fields of the struct are already in scope with identifiers `p0`, `p1`, ...
+fn forms_tuple(ident: &Ident, fields_unnamed: &FieldsUnnamed) -> [TokenStream2; 3] {
+    let (idents, types): (Vec<Ident>, Vec<&Type>) = fields_unnamed
         .unnamed
-        .into_iter()
+        .iter()
         .enumerate()
-        .map(|(index, field)| (unnamed_ident(index, &field.ident), field.ty))
+        .map(|(index, field)| (unnamed_ident(index, &field.ident), &field.ty))
         .unzip();
 
     let view = quote! {
@@ -173,12 +173,11 @@ fn forms_unnamed(
         ].into_iter().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title))
     };
 
-    let idents = idents.into_iter().map(|_| None).collect();
-
-    ([view, enter, update], idents)
+    [view, enter, update]
 }
 
-fn forms_unit(ident: Ident) -> ([TokenStream2; 3], Vec<Option<Ident>>) {
+/// Generates form representations for a unit struct or variant.
+fn forms_unit(ident: &Ident) -> [TokenStream2; 3] {
     let view = quote! {
         Form::new(Vec::new())
             .with_title(stringify!(#ident).to_case(Case::Title))
@@ -197,16 +196,76 @@ fn forms_unit(ident: Ident) -> ([TokenStream2; 3], Vec<Option<Ident>>) {
             .to_case(Case::Title))
     };
 
-    let idents = Vec::new();
-
-    ([view, enter, update], idents)
+    [view, enter, update]
 }
 
+/// Turns an index into an identifier `p0`, `p1`, ...
 fn unnamed_ident(index: usize, ident: &Option<Ident>) -> Ident {
     Ident::new(format!("p{}", index).as_str(), ident.span())
 }
 
-fn fields_idents(fields: &Fields) -> TokenStream2 {
+/// Generates identifiers for fields in structs.
+///
+/// Structs:
+///
+/// ```
+///  let name0 = &self.name0;
+///  let name1 = &self.name1;
+///  // ...
+/// ```
+///
+/// Tuple structs:
+///
+/// ```
+///  let p0 = &self.0;
+///  let p1 = &self.1;
+///  // ...
+/// ```
+///
+/// Unit structs:
+///
+/// ```
+/// // Generates nothing
+/// ```
+fn fields_idents_struct(fields: &Fields) -> TokenStream2 {
+    match fields {
+        Fields::Named(fields_named) => fields_named
+            .named
+            .iter()
+            .map(|field| &field.ident)
+            .map(|ident| quote! { let #ident = &self.#ident; })
+            .collect(),
+        Fields::Unnamed(fields_unnamed) => fields_unnamed
+            .unnamed
+            .iter()
+            .enumerate()
+            .map(|(index, field)| (Index::from(index), unnamed_ident(index, &field.ident)))
+            .map(|(index, ident)| quote! { let #ident = &self.#index; })
+            .collect(),
+        Fields::Unit => quote! {},
+    }
+}
+
+/// Generates identifiers for fields in enum variants.
+///
+/// Struct variants:
+///
+/// ```
+/// { name0, name1, /* ... */ }
+/// ```
+///
+/// Tuple variants:
+///
+/// ```
+/// (p0, p1, /* ... */)
+/// ```
+///
+/// Unit variants:
+///
+/// ```
+/// // Generates nothing
+/// ```
+fn fields_idents_variant(fields: &Fields) -> TokenStream2 {
     match fields {
         Fields::Named(fields_named) => {
             let fields: Vec<_> = fields_named
