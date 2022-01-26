@@ -124,21 +124,40 @@ fn forms_struct(ident: &Ident, fields_named: &FieldsNamed) -> [TokenStream2; 3] 
         .unzip();
 
     let view = quote! {
-        Form::new(vec![
-            #(#idents.view().into_iter().collect::<Form>().with_hint(stringify!(#idents).to_case(Case::Title)),)*
-        ].into_iter().flatten().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title)).readonly()
+        Form::new()
+            #(.with_input(
+                Input::new(InputValue::Form(#idents.view()))
+                    .with_hint(stringify!(#idents).to_case(Case::Title))
+            ))*
+            .into_iter()
+            .flatten()
+            .collect::<Form>()
+            .with_title(stringify!(#ident).to_case(Case::Title))
+            .readonly()
     };
 
     let enter = quote! {
-        Form::new(vec![
-            #(#types::enter().into_iter().collect::<Form>().with_hint(stringify!(#idents).to_case(Case::Title)),)*
-        ].into_iter().flatten().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title))
+        Form::new()
+            #(.with_input(
+                Input::new(InputValue::Form(#types::enter()))
+                    .with_hint(stringify!(#idents).to_case(Case::Title))
+            ))*
+            .into_iter()
+            .flatten()
+            .collect::<Form>()
+            .with_title(stringify!(#ident).to_case(Case::Title))
     };
 
     let update = quote! {
-        Form::new(vec![
-            #(#idents.update().into_iter().collect::<Form>().with_hint(stringify!(#idents).to_case(Case::Title)),)*
-        ].into_iter().flatten().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title))
+        Form::new()
+            #(.with_input(
+                Input::new(InputValue::Form(#idents.update()))
+                    .with_hint(stringify!(#idents).to_case(Case::Title))
+            ))*
+            .into_iter()
+            .flatten()
+            .collect::<Form>()
+            .with_title(stringify!(#ident).to_case(Case::Title))
     };
 
     [view, enter, update]
@@ -156,21 +175,31 @@ fn forms_tuple(ident: &Ident, fields_unnamed: &FieldsUnnamed) -> [TokenStream2; 
         .unzip();
 
     let view = quote! {
-        Form::new(vec![
-            #(#idents.view().into_iter().collect::<Form>(),)*
-        ].into_iter().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title)).readonly()
+        Form::new()
+            #(.with_input(Input::new(InputValue::Form(#idents.view()))))*
+            .into_iter()
+            .flatten()
+            .collect::<Form>()
+            .with_title(stringify!(#ident).to_case(Case::Title))
+            .readonly()
     };
 
     let enter = quote! {
-        Form::new(vec![
-            #(#types::enter().into_iter().collect::<Form>(),)*
-        ].into_iter().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title))
+        Form::new()
+            #(.with_input(Input::new(InputValue::Form(#types::enter()))))*
+            .into_iter()
+            .flatten()
+            .collect::<Form>()
+            .with_title(stringify!(#ident).to_case(Case::Title))
     };
 
     let update = quote! {
-        Form::new(vec![
-            #(#idents.update().into_iter().collect::<Form>(),)*
-        ].into_iter().flatten().collect()).with_title(stringify!(#ident).to_case(Case::Title))
+        Form::new()
+            #(.with_input(Input::new(InputValue::Form(#idents.update()))))*
+            .into_iter()
+            .flatten()
+            .collect::<Form>()
+            .with_title(stringify!(#ident).to_case(Case::Title))
     };
 
     [view, enter, update]
@@ -179,19 +208,19 @@ fn forms_tuple(ident: &Ident, fields_unnamed: &FieldsUnnamed) -> [TokenStream2; 
 /// Generates form representations for a unit struct or variant.
 fn forms_unit(ident: &Ident) -> [TokenStream2; 3] {
     let view = quote! {
-        Form::new(Vec::new())
+        Form::new()
             .with_title(stringify!(#ident).to_case(Case::Title))
             .readonly()
     };
 
     let enter = quote! {
-        Form::new(Vec::new())
+        Form::new()
             .with_title(stringify!(#ident)
             .to_case(Case::Title))
     };
 
     let update = quote! {
-        Form::new(Vec::new())
+        Form::new()
             .with_title(stringify!(#ident)
             .to_case(Case::Title))
     };

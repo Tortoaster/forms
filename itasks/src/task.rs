@@ -12,15 +12,16 @@ impl<C: Component> Task<C> {
     fn new(form: Form) -> Task<C> {
         Task {
             form,
-            phantom: Default::default(),
+            phantom: PhantomData,
         }
     }
 
     pub fn and<D: Component>(self, other: Task<D>) -> Task<(C, D)> {
-        Task::new(Form::new(vec![
-            Input::new(InputValue::Form(self.form)),
-            Input::new(InputValue::Form(other.form)),
-        ]))
+        Task::new(
+            Form::new()
+                .with_input(Input::new(InputValue::Form(self.form)))
+                .with_input(Input::new(InputValue::Form(other.form))),
+        )
     }
 
     pub fn actions<D>(self) -> Actions<C, D> {
