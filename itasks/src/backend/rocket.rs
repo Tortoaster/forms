@@ -14,7 +14,7 @@ impl<'r, 'o: 'r, C: Component> Responder<'r, 'o> for Task<C> {
     fn respond_to(self, _: &'r Request<'_>) -> rocket::response::Result<'o> {
         let content = format!(
             "<!DOCTYPE html><html><head><title>iTasks</title><link rel=\"stylesheet\" href=\"/itasks/style.css\"/></head><body><div class=\"container\">{}</div></body></html>",
-            self.form.as_html().map_err(|_| Status::InternalServerError)?
+            self.form.html().map_err(|_| Status::InternalServerError)?
         );
         Response::build()
             .header(ContentType::HTML)
