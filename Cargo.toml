@@ -2,5 +2,6 @@
 members = [
     "itasks",
     "itasks_derive",
-    "examples/itasks_rocket"
+    "wasm",
+    "examples/*"
 ]
