@@ -24,22 +24,47 @@ body {
     background-color: #5D9DF0;
 }
 
+.actions {
+    display: flex;
+    justify-content: right;
+    width: 100%;
+}
+
 input {
     font-size: inherit;
 }
 
-input:not(:last-child) {
+input {
     margin-bottom: 0.5em;
+}
+
+input[type=text], input[type=number], input[type=submit] {
+    border: none;
+    border-radius: 0.5em;
+    box-sizing: border-box;
+    padding: 0.5em;
+}
+
+input[type=submit] {
+    background-color: #5D9DF0;
+    color: #FFFFFF;
+    font-weight: bold;
+    margin-bottom: 0;
+    padding: 0.5em 1.5em;
+}
+
+input[type=submit]:not(:last-child) {
+    margin-right: 0.5em;
 }
 
 input[type=text], input[type=number] {
     background-color: #DFE3E8;
-    border: none;
-    border-radius: 0.5em;
-    box-sizing: border-box;
     color: #00303D;
-    padding: 0.5em;
     width: 100%;
+}
+
+input[type=submit]:hover {
+    background-color: #00303D;
 }
 
 input[type=checkbox] {

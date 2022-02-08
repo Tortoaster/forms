@@ -58,6 +58,7 @@ impl Form {
                 .collect::<Result<Vec<_>, _>>()?
                 .join("<br/>")
         )?;
+        write!(s, "<div class=\"actions\">")?;
         for action in &self.actions {
             let id = ctx.new_input();
             write!(
@@ -67,6 +68,7 @@ impl Form {
                 action.label()
             )?;
         }
+        write!(s, "</div>")?;
         write!(s, "</div>")?;
 
         write!(s, "</div>")
