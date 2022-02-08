@@ -58,6 +58,15 @@ impl Form {
                 .collect::<Result<Vec<_>, _>>()?
                 .join("<br/>")
         )?;
+        for action in &self.actions {
+            let id = ctx.new_input();
+            write!(
+                s,
+                "<input form=\"{}\" id=\"{id}\" name=\"{id}\" type=\"submit\" value=\"{}\"/>",
+                ctx.current_form(),
+                action.label()
+            )?;
+        }
         write!(s, "</div>")?;
 
         write!(s, "</div>")

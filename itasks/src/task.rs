@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::marker::PhantomData;
 
 use crate::component::Component;
@@ -27,6 +28,7 @@ impl<C: Component> Task<C> {
     pub fn actions<D>(self) -> Actions<C, D> {
         Actions {
             task: self,
+            actions: BTreeMap::new(),
             phantom: Default::default(),
         }
     }
@@ -34,26 +36,42 @@ impl<C: Component> Task<C> {
 
 pub struct Actions<C, D> {
     task: Task<C>,
+    actions: BTreeMap<Action, Box<dyn FnOnce(C) -> Task<D>>>,
     phantom: PhantomData<D>,
 }
 
 impl<C, D> Actions<C, D> {
-    pub fn on(self, _action: Action, _f: impl FnOnce(C) -> Task<D>) -> Self {
+    pub fn on(mut self, action: Action, f: impl FnOnce(C) -> Task<D> + 'static) -> Self {
+        self.actions.insert(action, Box::new(f));
         self
     }
 
     pub fn finalize(self) -> Task<D> {
         Task {
-            form: self.task.form,
+            form: self
+                .task
+                .form
+                .with_actions(self.actions.into_iter().map(|(k, _)| k).collect()),
             phantom: Default::default(),
         }
     }
 }
 
+#[derive(Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub enum Action {
     Ok,
     Cancel,
     Custom(String),
+}
+
+impl Action {
+    pub fn label(&self) -> String {
+        match self {
+            Action::Ok => "Ok".to_owned(),
+            Action::Cancel => "Cancel".to_owned(),
+            Action::Custom(s) => s.clone(),
+        }
+    }
 }
 
 pub fn view<C: Component>(component: C) -> Task<C> {

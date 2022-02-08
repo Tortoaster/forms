@@ -1,10 +1,13 @@
 use std::collections::BTreeMap;
 use std::iter::FromIterator;
 
+use crate::task::Action;
+
 #[derive(Debug)]
 pub struct Form {
     pub(crate) title: Option<String>,
     pub(crate) inputs: Vec<Input>,
+    pub(crate) actions: Vec<Action>,
     pub(in crate::frontend) readonly: bool,
 }
 
@@ -13,6 +16,7 @@ impl Form {
         Form {
             title: None,
             inputs: Vec::new(),
+            actions: Vec::new(),
             readonly: false,
         }
     }
@@ -24,6 +28,11 @@ impl Form {
 
     pub fn with_title(mut self, title: String) -> Self {
         self.title = Some(title);
+        self
+    }
+
+    pub fn with_actions(mut self, actions: Vec<Action>) -> Self {
+        self.actions = actions;
         self
     }
 
@@ -78,9 +87,11 @@ impl FromIterator<Input> for Form {
     fn from_iter<T: IntoIterator<Item = Input>>(iter: T) -> Self {
         let inputs: Vec<Input> = iter.into_iter().collect();
 
+        // TODO: Special iterator that remembers title and actions
         Form {
             title: None,
             inputs,
+            actions: Vec::new(),
             readonly: false,
         }
     }

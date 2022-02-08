@@ -4,6 +4,7 @@ extern crate rocket;
 use rocket::error::Error;
 
 use itasks::prelude::*;
+use itasks::task::Action;
 
 #[derive(Component)]
 struct UnitStruct;
@@ -20,8 +21,17 @@ struct NamedStruct {
 }
 
 #[get("/")]
-fn index() -> Task<NamedStruct> {
-    enter()
+fn index() -> Task<TupleStruct> {
+    enter::<String>()
+        .actions()
+        .on(Action::Ok, |name| {
+            let ts = TupleStruct(name, 42, true, UnitStruct);
+            view(ts)
+        })
+        .on(Action::Cancel, |_| {
+            view(TupleStruct(":(".to_owned(), 0, false, UnitStruct))
+        })
+        .finalize()
 }
 
 #[rocket::main]
